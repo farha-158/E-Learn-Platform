@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Add Instructor</title>
+    <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
+</head>
+<body class="bg-light">
+    <div class="container mt-5">
+    <div class="card shadow p-4 mx-auto" style="max-width: 500px;">
+        <h2 class="text-center mb-4">Add New Instructor</h2>
+
+        <form id="addInstructorForm" enctype="multipart/form-data">
+        <div class="mb-3">
+            <input type="text" class="form-control" name="name" placeholder="Instructor Name" required />
+        </div>
+        <div class="mb-3">
+            <input type="email" class="form-control" name="email" placeholder="Email" required />
+        </div>
+        <div class="mb-3">
+            <input type="text" class="form-control" name="specialization" placeholder="Specialization" required />
+        </div>
+        <div class="mb-3">
+            <input type="text" class="form-control" name="country" placeholder="Country" required />
+        </div>
+        <div class="mb-3">
+            <input type="number" class="form-control" name="experienceYear" placeholder="Years of Experience" min="1" required />
+        </div>
+        <div class="mb-3">
+            <input type="file" class="form-control" name="profileImage" accept="image/*" required />
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">Add Instructor</button>
+    </form>
+
+        <p id="message" class="text-center mt-3"></p>
+    </div>
+    </div>
+
+    <script>
+        const form = document.getElementById("addInstructorForm");
+        const message = document.getElementById("message");
+
+        form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const formData = new FormData(form); 
+
+        message.textContent = "Uploading instructor data...";
+        message.className = "text-info";
+
+        try {
+            const res = await fetch("/addInstructor", {
+            method: "POST",
+            body: formData,
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+                setTimeout(()=>{
+                    message.textContent = data.data;
+                    message.className = "text-success";
+                },1000)
+                
+                setTimeout(() => {
+                    form.reset();
+                }, 1500);
+                
+            } else {
+                message.innerHTML = "";
+                for(i=0;i<(data.error).length;i++){
+                    message.textContent = (data.error)[i].message || "Invalid credentials";
+                    message.className = "text-danger";
+                }
+            }
+        } catch (err) {
+            console.error(err);
+            message.textContent = "Server error. Please try again.";
+            message.className = "text-danger";
+        }
+        });
+    </script>
+
+    <script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

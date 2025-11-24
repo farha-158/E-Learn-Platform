@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Courses</title>
+  <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
+</head>
+
+<body class="bg-light">
+  <div class="container mt-5">
+    <!-- مكان عرض الكورسات -->
+    <div id="coursesContainer" class="row g-4"></div>
+  </div>
+
+  <script>
+    async function loadCourses() {
+      try {
+        const res = await fetch("/api");
+        const json = await res.json();
+        const userId = "<%= userId %>"
+        console.log(userId)
+        const courses = json.data;   // array
+        const container = document.getElementById("coursesContainer");
+
+        container.innerHTML = ""; // تفريغ قبل العرض
+        if (!courses || courses.length === 0) {
+          container.innerHTML = `
+            <div class="col-12 text-center py-5">
+              <h3 class="text-secondary fw-bold">No Courses Available</h3>
+              <p class="text-muted">There are no courses to display right now.</p>
+            </div>
+          `;
+          return;
+        }
+
+        courses.forEach(course => {
+          const card = `
+            <div class="col-md-4">
+              <div class="card shadow-sm">
+              <img 
+                src="${course.thumbnailImage}" 
+                class="card-img-top bg-white" 
+                alt="Course Image" 
+                style="height: 220px; object-fit: contain; padding: 10px;" >
+                <div class="card-body">
+                  <h5 class="card-title">${course.name}</h5>
+                  <p class="card-text text-muted">${course.description}</p>
+
+                  <p class="mb-1"><strong>Duration:</strong> ${course.courseDuration} min</p>
+                  
+                  <p class="mb-1"><strong>Level:</strong> ${course.level}</p>
+                  <p class="mb-1"><strong>Language:</strong> ${course.language}</p>
+
+                  <p class="text-primary fw-bold mt-3">Price: ${course.price} $</p>
+
+                  <a href="/course/${course._id}/${userId}" class="btn btn-primary w-100">View Course</a>
+                </div>
+              </div>
+            </div>
+          `;
+          
+          container.innerHTML += card;
+        });
+
+      } catch (err) {
+        console.log("Error loading courses:", err);
+      }
+    }
+
+    loadCourses();
+  </script>
+
+  <script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

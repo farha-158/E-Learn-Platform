@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign Up</title>
+
+  <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
+
+</head>
+<body class="bg-light">
+  <div class="container mt-5">
+    <div class="card shadow p-4 mx-auto" style="max-width: 400px;">
+      <h2 class="text-center mb-4">Sign Up</h2>
+
+      <form id="signupForm">
+        <div class="mb-3">
+          <input type="text" class="form-control" placeholder="Your name" name="name" required />
+        </div>
+        <div class="mb-3">
+          <input type="number" class="form-control" placeholder="Age" name="age" max="50" min="18" required />
+        </div>
+        <div class="mb-3">
+          <input type="email" class="form-control" placeholder="Email" name="email" required />
+        </div>
+        <div class="mb-3">
+          <input type="password" class="form-control" placeholder="Password" name="password" required />
+        </div>
+        <div class="mb-3">
+          <input type="password" class="form-control" placeholder="Confirm Password" name="confirmPassword" required />
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Register</button>
+      </form>
+      <p class="text-center mt-2">
+        Already have an account?
+        <a href="/login" class="text-decoration-none text-primary fw-semibold">Login here</a>
+        </p>
+        
+      <p id="message" class="text-center mt-3"></p>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById("signupForm");
+    const message = document.getElementById("message");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const formData = {
+        name: form.name.value,
+        age:Number(form.age.value),
+        email: form.email.value,
+        password: form.password.value,
+        confirmPassword: form.confirmPassword.value,
+      };
+
+      try {
+        const res = await fetch("/signup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+          credentials: "include" 
+        });
+        
+        const data = await res.json();
+        
+        if (data.success) {
+          message.textContent = data.data.message + " Redirecting to login...";
+          message.className = "text-success";
+
+          setTimeout(() => {
+            window.location.href = "/login";
+          }, 1000);
+
+          form.reset();
+        } else {
+            message.innerHTML = "";
+            for(i=0;i<(data.error).length;i++){
+              console.log((data.error)[i].message)
+              const p= document.createElement('p')
+              p.textContent=(data.error)[i].message
+              p.className="text-danger"
+              message.appendChild(p) ;
+              message.className = "text-danger";
+          }
+        }
+      } catch (err) {
+        message.textContent = "Server error. Please try again.";
+        message.className = "text-danger";
+      }
+    });
+  </script>
+<script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

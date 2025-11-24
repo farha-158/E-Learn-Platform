@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Verify Code</title>
+  <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
+</head>
+<body class="bg-light">
+  <div class="container mt-5">
+    <div class="card mx-auto shadow p-4" style="max-width: 420px;">
+      <h3 class="text-center mb-3">Verify Code</h3>
+      <p class="text-center mb-3">Enter the 6-digit code sent to your email.</p>
+
+      <form id="verifyForm" autocomplete="off">
+        <div class="mb-3">
+          <input 
+            type="number" 
+            id="code" 
+            name="code" 
+            class="form-control text-center" 
+            placeholder="Enter verification code" 
+            required 
+          />
+        </div>
+
+        <button class="btn btn-primary w-100" type="submit">Verify Code</button>
+      </form>
+
+      <div class="text-center mt-3">
+        <button id="resendBtn" class="btn btn-secondary btn-sm">Resend Code</button>
+        <span id="resendTimer" class="ms-2 text-muted"></span>
+      </div>
+
+      <p id="message" class="text-center mt-3"></p>
+
+      <div class="text-center mt-2">
+        <a href="/login" class="text-decoration-none">Back to Login</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('verifyForm');
+    const msg = document.getElementById('message');
+    const resendBtn = document.getElementById('resendBtn');
+    const resendTimer = document.getElementById('resendTimer');
+    let countdown = 0;
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      msg.textContent = '';
+      msg.className = '';
+
+      const code = document.getElementById('code').value.trim();
+      const urlParams = new URLSearchParams(window.location.search);
+      const email = urlParams.get('email');
+      if (!code) {
+        msg.textContent = 'Please enter the verification code';
+        msg.className = 'text-danger';
+        return;
+      }
+
+      try {
+        const res = await fetch(`/verify-code`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, code }),
+        });
+
+        const data = await res.json();
+        console.log(data)
+        if (data.success) {
+          msg.textContent = data.data.msg || 'Code verified successfully';
+          msg.className = 'text-success';
+
+          setTimeout(() => {
+            window.location.href = `/`; 
+          }, 1200);
+        } else {
+            msg.innerHTML = "";
+            for(i=0;i<(data.error).length;i++){
+              
+              msg.textContent = (data.error)[i].message || 'Email not found in database';
+              msg.className = "text-danger";
+          }
+        }
+      } catch (err) {
+        msg.textContent = 'Server error. Try again.';
+        msg.className = 'text-danger';
+      }
+    });
+
+    resendBtn.addEventListener('click', async () => {
+      if (countdown > 0) return;
+
+      resendBtn.disabled = true;
+      countdown = 30; 
+      updateTimer();
+
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const email = urlParams.get('email');
+
+        const res = await fetch('/forgot-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        });
+
+        const data = await res.json();
+        console.log(data)
+
+        if (data.success) {
+          alert(' New verification code sent to your email!');
+        } else {
+          alert((data.data.message || 'Error sending code'));
+        }
+
+      } catch (err) {
+        console.error(err);
+        alert(' Server error. Try again.');
+      }
+    });
+
+    function updateTimer() {
+      if (countdown > 0) {
+        resendTimer.textContent = `${countdown}s`;
+        countdown--;
+        setTimeout(updateTimer, 1000);
+      } else {
+        resendBtn.disabled = false;
+        resendTimer.textContent = '';
+      }
+    }
+  </script>
+
+  <script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

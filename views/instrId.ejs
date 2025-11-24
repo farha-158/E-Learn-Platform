@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instructor Details</title>
+  <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
+</head>
+<body class="bg-light">
+
+  <div class="container mt-5">
+    <div id="instructorContainer" class="card shadow p-4 text-center">
+      <h2 id="instructorName">Loading...</h2>
+      <img id="instructorImage" class="rounded-circle mb-4" style="width:200px; height:200px; object-fit: contain;" />
+      <p><strong>Email:</strong> <span id="instructorEmail"></span></p>
+      <p><strong>Specialization:</strong> <span id="instructorSpecialization"></span></p>
+      <p><strong>Country:</strong> <span id="instructorCountry"></span></p>
+      <p><strong>Experience:</strong> <span id="instructorExperience"></span> Years</p>
+      <button class="btn btn-sm btn-primary" id="openchat">Chat</button>    
+    </div>
+  </div>
+
+  <script>
+    async function loadInstructor() {
+      try {
+        // جلب بيانات المدرس من السيرفر
+        const res = await fetch(`/instructor/api/<%= Iid %>`); 
+        const json = await res.json();
+        const instr = json.data;
+        const userId="<%= Uid %>"
+
+        // عرض البيانات في الصفحة
+        document.getElementById("instructorName").innerText = instr.name;
+        document.getElementById("instructorImage").src = "/" + instr.profileImage.replace(/\\/g, '/');
+        document.getElementById("instructorEmail").innerText = instr.email;
+        document.getElementById("instructorSpecialization").innerText = instr.specialization;
+        document.getElementById("instructorCountry").innerText = instr.country;
+        document.getElementById("instructorExperience").innerText = instr.experienceYear;
+        document.getElementById("openchat").onclick=()=>openChat(instr._id)
+      } catch (err) {
+        console.error("Error loading instructor:", err);
+        document.getElementById("instructorContainer").innerHTML = "<p class='text-danger'>Failed to load instructor data.</p>";
+      }
+    }
+
+    loadInstructor();
+    async function openChat(instrId){
+      const userId = "<%= Uid %>";
+      const res1 = await fetch(`/chat?instrId=${instrId}&userId=${userId}`);
+      const json2 = await res1.json();
+      const chat = json2.data;
+
+      localStorage.setItem("chatId",chat._id)
+      localStorage.setItem("instrId",instrId)
+      localStorage.setItem("userId",userId)
+      window.location.href='/chat-page'
+
+}
+
+
+  </script>
+
+</body>
+</html>
