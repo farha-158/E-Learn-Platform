@@ -148,21 +148,23 @@ E-LEARN PLATFORM
 ```bash```
 npm install
 
-### إعداد ملف البيئة .env
+### 2️⃣ إعداد ملف البيئة .env
 PORT=5000
 MONGO_URI=your_mongodb_url
 JWT_SECRET=your_jwt_secret
 EMAIL_USER=your_email
 EMAIL_PASS=your_password
-###3️⃣ تشغيل المشروع
+### 3️⃣ تشغيل المشروع
 وضع التطوير:
+
 npm run dev
 
 وضع الإنتاج:
+
 npm run build
 npm start
 
-👩‍💻 المطورة
+## 👩‍💻 المطورة
 
 Farha Ashraf
 Back-End Developer (Node.js – TypeScript – MongoDB)
